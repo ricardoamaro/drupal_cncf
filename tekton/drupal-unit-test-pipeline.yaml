@@ -1,0 +1,9 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: drupal-unit-test-pipeline
+spec:
+  tasks:
+    - name: drupal-unit-tests
+      taskRef:
+        name: drupal-unit-test

@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: drupal-test
+spec:
+  steps:
+    - name: lint
+      image: drupal:latest
+      script: |
+        #! /bin/bash
+        echo "Running Drupal linting..."

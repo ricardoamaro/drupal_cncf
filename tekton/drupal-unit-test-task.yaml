@@ -1,0 +1,18 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: drupal-unit-test
+spec:
+  steps:
+    - name: run-tests
+      image: php:7.4-cli
+      script: |
+        #!/bin/bash
+        set -e
+        apt-get update && apt-get install -y git
+        git clone https://your-drupal-repo.git /drupal
+        cd /drupal
+        # Install dependencies, e.g., with Composer
+        composer install
+        # Run unit tests, adjust the path as necessary
+        ./vendor/bin/phpunit --configuration ./web/core/phpunit.xml.dist ./web/modules/custom
