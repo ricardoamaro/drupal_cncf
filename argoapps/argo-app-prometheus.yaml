@@ -5,20 +5,19 @@ metadata:
   namespace: argocd
 spec:
   destination:
-    name: in-cluster
-    namespace: argocd
+    server: 'https://kubernetes.default.svc'
+    namespace: drupal
   project: default
-  source:
-    repoURL: 'https://prometheus-community.github.io/helm-charts'
-    chart: kube-prometheus-stack
-    # chart: prometheus
-    targetRevision: '*'
-    helm:
-      valueFiles:
-      - $values/argoapps/prometheus/values.yaml
-  - repoURL: 'https://github.com/ricardoamaro/drupal_cncf.git'
-    targetRevision: dev
-    ref: values
+  sources:
+    - repoURL: 'https://prometheus-community.github.io/helm-charts'
+      chart: kube-prometheus-stack
+      targetRevision: '*'
+      helm:
+        valueFiles:
+        - $values/argoapps/prometheus/values.yaml
+    - repoURL: 'https://github.com/ricardoamaro/drupal_cncf.git'
+      targetRevision: HEAD
+      ref: values
   syncPolicy:
     automated:
       selfHeal: true
