@@ -93,6 +93,12 @@ Ensure Docker, kubectl, kind/k3d, helm, and git are installed on your system.
     - **Username**: The default username is `admin`.
     - **Password**: Use the password retrieved from the `argocd-initial-admin-secret` secret.
 
+    For login via the command line:
+
+    ```bash
+    argocd login http://localhost:8080
+    ```
+
 1. **(Optional) Change the Admin Password**:
 
     For security reasons, it's a good practice to change the default admin password. You can do this from the Argo CD UI or by using the Argo CD CLI. If you have the CLI installed, you can execute the following command to change the password:
@@ -103,9 +109,45 @@ Ensure Docker, kubectl, kind/k3d, helm, and git are installed on your system.
 
     You'll be prompted to enter the current password (retrieved in step 1), and then you can set a new password.
 
+#### Deploy the Root Application to Argo CD
+
+Next steps are only required if you are kick stating manually a new repository.
+
+You can deploy the existing root application to Argo CD using the Argo CD CLI or the UI:
+
+* Using the CLI:
+
+First, make sure you're logged into your Argo CD instance:
+
+    ```bash
+    argocd login <ARGOCD_SERVER>
+    ```
+
+Then, create the root application:
+
+    ```bash
+    argocd app create -f argoapps/root.yaml
+    ```
+
+* Using the UI:
+
+        Navigate to your Argo CD UI.
+        Click on "New App".
+        Fill in the details according to your root.yaml content.
+        Click "Create".
+
+* Verify and Manage Your Applications
+
+Once the root application is deployed, Argo CD will automatically detect, deploy, and manage all applications defined in the argoapps/ directory as specified in this Git repository. You can verify the status of all applications in the Argo CD dashboard or CLI:
+
+    ```bash
+    argocd app list
+    ```
+
+You should see the root application along with all other applications it manages. Any changes made to these application definitions in the Git repository will be automatically synced by Argo CD, adhering to the GitOps principles.
+
 
 ### 3. Prepare Your Git Repository
-
 
 Clone or initialize a Git repository to store your Kubernetes manifests. In this repository, create directories for each of the applications (Drupal, MySQL, Prometheus, Grafana) and Tekton configurations. Example structure:
 
