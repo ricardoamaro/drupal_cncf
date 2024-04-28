@@ -96,7 +96,7 @@ Ensure Docker, kubectl, kind/k3d, helm, and git are installed on your system.
     For login via the command line:
 
     ```bash
-    argocd login http://localhost:8080
+    argocd login localhost:8080 --insecure
     ```
 
 1. **(Optional) Change the Admin Password**:
@@ -167,6 +167,12 @@ Clone or initialize a Git repository to store your Kubernetes manifests. In this
 Inside each directory, add the necessary Kubernetes manifests or Helm charts. For Tekton, define your CI pipeline for testing Drupal.
 
 ### 4. Install Tekton Pipelines
+
+Install Tekton Pipelines in your cluster:
+
+    ```bash
+    kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
+    ```
 
 #### Installing the Tekton Dashboard
 
