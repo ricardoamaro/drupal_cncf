@@ -7,11 +7,11 @@ spec:
   project: default
   source:
     repoURL: 'https://github.com/ricardoamaro/drupal_cncf.git'
-    path: argoapps/tekton
+    path: argoapps/tekton # Adjust if your kustomization.yaml is in a subdirectory
     targetRevision: HEAD
-    helm:
-      valueFiles:
-        - values.yaml
+#    helm:
+#      valueFiles:
+#        - values.yaml
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: tekton-pipelines
