@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: 'https://github.com/ricardoamaro/drupal_cncf.git'
-    path: mariadb
+    path: argoapps/mariadb
     targetRevision: HEAD
     helm:
       valueFiles:

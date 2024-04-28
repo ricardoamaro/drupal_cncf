@@ -6,37 +6,61 @@ CI/CD pipeline is using Tekton for testing and Argo CD for deployment. This appr
 Ensure you have the following prerequisites installed and configured:
 - Docker
 - `kubectl`
-- `kind`
+- `kind` or `k3d`
 - `helm`
 - `kubectl-argo-rollouts` plugin for Argo CD interaction (optional but useful)
 - Access to a Git repository to store your Kubernetes manifests and Tekton pipelines
 
-Ensure Docker, kubectl, kind, helm, and git are installed on your system.
+Ensure Docker, kubectl, kind/k3d, helm, and git are installed on your system.
 
-1. **Create a Cluster Configuration File** (`kind-config.yaml`):
+### Step 1: Create a Cluster
 
-    ```yaml
-    kind: Cluster
-    apiVersion: kind.x-k8s.io/v1alpha4
-    nodes:
-      - role: control-plane
-        extraPortMappings:
-          - containerPort: 80
-            hostPort: 80
-            protocol: TCP
-          - containerPort: 443
-            hostPort: 443
-            protocol: TCP
-      - role: worker
-    ```
-
-2. **Create the Cluster**:
+1. **Create a Cluster using k3d**
 
     ```bash
-    kind create cluster --config kind-config.yaml
+    k3d cluster create my-cluster \
+      --port "80:80@loadbalancer" \
+      --port "443:443@loadbalancer" \
+      --agents 1
     ```
 
+
+    ```bash
+    k3d cluster list
+    ```
+
+1. **Alternatively a cluster can be created using kind**
+
+    Create a Cluster Configuration File** (`kind-config.yaml`):
+
+        ```yaml
+        kind: Cluster
+        apiVersion: kind.x-k8s.io/v1alpha4
+        nodes:
+          - role: control-plane
+            extraPortMappings:
+              - containerPort: 80
+                hostPort: 80
+                protocol: TCP
+              - containerPort: 443
+                hostPort: 443
+                protocol: TCP
+          - role: worker
+        ```
+
+    Create the kind Cluster:
+
+        ```bash
+        kind create cluster --config kind-config.yaml
+        ```
+
 ### Step 2: Install Argo CD
+
+1. **Ckeck access to the cluster**
+
+    ```bash
+    kubectl cluster-info
+    ```
 
 1. **Install Argo CD in the Cluster**:
 
@@ -102,11 +126,6 @@ Inside each directory, add the necessary Kubernetes manifests or Helm charts. Fo
 
 ### 4. Install Tekton Pipelines
 
-Install Tekton Pipelines in your cluster:
-
-```bash
-kubectl apply --filename https://storage.googleapis.com/tekton-releases/pipeline/latest/release.yaml
-```
 #### Installing the Tekton Dashboard
 
 1. **Install the Tekton Dashboard**:
@@ -399,28 +418,29 @@ To populate the `prometheus/` and `grafana/` directories in your Git repository 
    Example `argo-app-prometheus.yaml`:
 
    ```yaml
-   apiVersion: argoproj.io/v1alpha1
-   kind: Application
-   metadata:
-     name: prometheus
-     namespace: argocd
-   spec:
-     project: default
-     source:
-       repoURL: 'https://your-git-repo-url.git'
-       path: prometheus
-       targetRevision: HEAD
-       helm:
-         valueFiles:
-           - values.yaml
-     destination:
-       server: 'https://kubernetes.default.svc'
-       namespace: monitoring
-     syncPolicy:
-       automated:
-         selfHeal: true
-         prune: true
-   ```
+    apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: prometheus
+      namespace: argocd
+    spec:
+      destination:
+        name: in-cluster
+        namespace: argocd
+      project: default
+      source:
+        repoURL: 'https://prometheus-community.github.io/helm-charts'
+        chart: kube-prometheus-stack
+        targetRevision: 58.2.2
+        helm:
+          valueFiles:
+            - values.yaml
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+          sync: true
+    ```
 
 #### Setting Up Grafana
 
@@ -482,6 +502,12 @@ To populate the `prometheus/` and `grafana/` directories in your Git repository 
 ### Deploying with Argo CD
 
 With these configurations in place, commit and push your changes to the Git repository. Then, use Argo CD to create applications from the `argo-app-prometheus.yaml` and `argo-app-grafana.yaml` manifests. Argo CD will deploy Prometheus and Grafana based on your configurations, with Grafana automatically configured to use Prometheus as a data source.
+
+Add helm repositories
+
+    ```bash
+    argocd repo add https://prometheus-community.github.io/helm-charts --type helm --name stable
+    ```
 
 ### Step 11: Deploy Drupal with Argo CD
 
